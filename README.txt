@@ -1,1 +1,1 @@
-Fetches FRC team updates on a daily basis and sends them to marked channels. Mark a channel with "!frctu mark", unmark with "!frctu unmark".
+Checks for new FRC Team Updates and sends them to marked channels. Mark a channel with "!frctu mark", unmark with "!frctu unmark".

@@ -58,6 +58,8 @@ class FRCTeamUpdateObserver(object):
         """
         self._check_year()
         url = self._get_url(next_update=True)
+        
+        print("Checking for team update at " + url + "...")
         r = requests.get(url)
 
         if r.status_code == 200:

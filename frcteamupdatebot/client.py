@@ -5,17 +5,18 @@ import os
 import logging
 import sys
 import requests
+from psycopg2 import errorcodes
 
 HELP_MESSAGE = """Type '!frctu mark' to mark a channel for team updates.
 Type '!frctu unmark' to unmark a channel for team updates."""
 # these default settings assume this is being ran with docker-compose
-DEFAULT_PSYCOPG2_SETTINGS = "dbname=postgres user=postgres password=postgres host=172.19.0.3"
 ADMIN_IDS = ['188472809280897024', '117126246168657924']
+DEFAULT_PSYCOPG2_SETTINGS = "dbname=postgres user=postgres password=postgres host=172.19.0.3"
+PSYCOPG2_SETTINGS = os.getenv("PSYCOPG2_SETTINGS", default=DEFAULT_PSYCOPG2_SETTINGS)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 client = discord.Client()
-db = psycopg2.connect(os.getenv("PSYCOPG2_SETTINGS", default=DEFAULT_PSYCOPG2_SETTINGS))
 
 # import after stuff is defined
 from .thread import FRCTeamUpdateThread
@@ -53,7 +54,6 @@ async def on_message(message):
             elif command[1] == "stop":
                 if message.author.id in ADMIN_IDS:
                     await client.send_message(message.channel, "Going to sleep...")
-                    db.close()
                     sys.exit()
                 else:
                     await client.send_message(message.channel, "'" + command[1] + "' is not a command.")
@@ -67,6 +67,7 @@ async def on_message(message):
             permissions = message.author.permissions_in(message.channel)
             if permissions.administrator:
                 try:
+                    db = psycopg2.connect(PSYCOPG2_SETTINGS)
                     cursor = db.cursor()
                     cursor.execute(query, (message.channel.id, ))
                     cursor.close()
@@ -80,7 +81,7 @@ async def on_message(message):
                 except psycopg2.Error as err:
                     await client.send_message(
                         message.channel, 
-                        "An internal database error occured while trying to process your request:\n\n" + err.message
+                        "An internal database error occured while trying to process your request: " + errorcodes.lookup(err.pgcode)
                     )
             else:
                 await client.send_message(message.channel, "Administrator priveleges are required for command '" + command[1] + "'.")

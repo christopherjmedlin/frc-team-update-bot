@@ -1,4 +1,4 @@
-from .client import db, client
+from .client import PSYCOPG2_SETTINGS, client
 import requests
 import tempfile
 import os
@@ -8,6 +8,7 @@ import urllib
 from datetime import date
 import asyncio
 from .observer import FRCTeamUpdateObserver
+import psycopg2
 
 class FRCTeamUpdateThread(threading.Thread):
     """
@@ -39,7 +40,7 @@ class FRCTeamUpdateThread(threading.Thread):
                 pdf_url = save_to_web_archive(pdf_url)
                 message = self.TEAM_UPDATE_MESSAGE.format(pdf_url)
                 send_message_to_channels_in_db(
-                    message, db, self.event_loop
+                    message, psycopg2.connect(PSYCOPG2_SETTINGS), self.event_loop
                 )
             time.sleep(1800.0)
 
@@ -78,3 +79,4 @@ def send_message_to_channels_in_db(message, db, event_loop):
             # event_loop.create_task(client.send_file(channel, file))
             event_loop.create_task(client.send_message(channel, message))
     cursor.close()
+    db.close()

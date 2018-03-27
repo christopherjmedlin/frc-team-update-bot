@@ -72,6 +72,7 @@ async def on_message(message):
                     cursor.execute(query, (message.channel.id, ))
                     cursor.close()
                     db.commit()
+                    db.close()
                     await client.send_message(message.channel, success_message)
                 except psycopg2.IntegrityError:
                     await client.send_message(
@@ -79,9 +80,15 @@ async def on_message(message):
                         "This channel has already been marked for FRC Team Updates."
                     )
                 except psycopg2.Error as err:
-                    await client.send_message(
-                        message.channel, 
-                        "An internal database error occured while trying to process your request: " + errorcodes.lookup(err.pgcode)
-                    )
+                    try:
+                        await client.send_message(
+                            message.channel, 
+                            "An internal database error occured while trying to process your request: " + errorcodes.lookup(err.pgcode)
+                        )
+                    except KeyError:
+                        await client.send_message(
+                            message.channel, 
+                            "An unknown internal error occured. ¯\_(ツ)_/¯"
+                        )
             else:
                 await client.send_message(message.channel, "Administrator priveleges are required for command '" + command[1] + "'.")

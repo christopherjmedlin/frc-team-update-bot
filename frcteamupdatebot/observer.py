@@ -1,16 +1,20 @@
 import requests
 from datetime import date
+import os
 
 class FRCTeamUpdateObserver(object):
 
     TEAM_UPDATE_URL = "https://firstfrc.blob.core.windows.net/frc{}/Manual/TeamUpdates/TeamUpdate{}.pdf"
 
-    def __init__(self, first_team_update_number):
-        self.first_team_update_number = first_team_update_number
-        self._find_last_team_update()
+    def __init__(self, last_team_update=None):
+        if last_team_update:
+            self.last_team_update = [date.today().year, last_team_update]
+        else:
+            self.last_team_update = [date.today().year, 18] 
+            self._find_last_team_update()
 
     def _get_url(self, next_update=False):
-        team_update = self.last_team_update
+        team_update = self.last_team_update[:]
         if next_update:
             team_update[1] += 1
         team_update_number = str(team_update[1])
@@ -27,8 +31,6 @@ class FRCTeamUpdateObserver(object):
         Increments the second element in last_team_update until the last posted
         team update has been found with requests.
         """
-        #TODO change back from 18 to 10 before production
-        self.last_team_update = [date.today().year, 8]
         loop = True
         while loop:
             self.last_team_update[1] += 1
@@ -41,11 +43,11 @@ class FRCTeamUpdateObserver(object):
     def _check_year(self):
         """
         Checks if there is a new year. If there is, the team update number is
-        reset to 10 and the year is updated.
+        reset and the year is updated.
         """
         if (self.last_team_update[0] < date.today().year):
             self.last_team_update[0] = date.today().year
-            self.last_team_update[1] = self.first_team_update_number
+            self.last_team_update[1] = 1
 
     def check_for_team_updates(self):
         """

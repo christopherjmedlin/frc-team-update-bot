@@ -19,9 +19,6 @@ class FRCTeamUpdateThread(threading.Thread):
     Discord client object from two seperate processes.
     """
 
-    #TODO change to 10 for production
-    FIRST_TEAM_UPDATE_NUMBER = 18
-
     TEAM_UPDATE_URL = "https://firstfrc.blob.core.windows.net/frc{}/Manual/TeamUpdates/TeamUpdate{}.pdf"
     TIMESTAMP_FORMAT = "'%Y-%m-%d'"
     TEAM_UPDATE_MESSAGE = ("New FRC Team Update:\n"
@@ -29,7 +26,10 @@ class FRCTeamUpdateThread(threading.Thread):
 
     def __init__(self, event_loop):
         threading.Thread.__init__(self)
-        self.observer = FRCTeamUpdateObserver(self.FIRST_TEAM_UPDATE_NUMBER)
+        if "FRCTU_LAST_TEAM_UPDATE" in os.environ:
+            self.observer = FRCTeamUpdateObserver(last_team_update=int(os.environ["FRCTU_LAST_TEAM_UPDATE"]))
+        else:
+            self.observer = FRCTeamUpdateObserver()
         self.event_loop = event_loop
 
     def run(self):

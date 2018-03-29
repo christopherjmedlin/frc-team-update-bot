@@ -10,7 +10,7 @@ class FRCTeamUpdateObserver(object):
         if last_team_update:
             self.last_team_update = [date.today().year, last_team_update]
         else:
-            self.last_team_update = [date.today().year, 18] 
+            self.last_team_update = [date.today().year, 0] 
             self._find_last_team_update()
 
     def _get_url(self, next_update=False):

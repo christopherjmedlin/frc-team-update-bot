@@ -1,13 +1,11 @@
 version: '2'
 services:
   bot:
+    env_file: .env
     build: .
     volumes:
       - .:/frc-team-update-bot
     command: python -u run.py
-    environment:
-      PSYCOPG2_SETTINGS: ${PSYCOPG2_SETTINGS}
-      TOKEN: ${TOKEN}
     depends_on:
       - db
   db:

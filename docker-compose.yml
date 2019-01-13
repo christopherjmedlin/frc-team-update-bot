@@ -12,3 +12,5 @@ services:
     build: ./db
     volumes:
       - /var/lib/postgresql/data
+    ports:
+      - "8001:5432"
